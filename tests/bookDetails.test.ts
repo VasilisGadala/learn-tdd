@@ -43,7 +43,7 @@ describe('showBookDtls', () => {
         // Act
         await showBookDtls(res as Response, '12345');
 
-        // Assert
+        // Assert (using spies here)
         expect(mockFindOne).toHaveBeenCalledWith({ _id: '12345' });
         expect(mockFindOne().populate).toHaveBeenCalledWith('author');
         expect(mockFind).toHaveBeenCalledWith({ book: '12345' });
@@ -98,5 +98,32 @@ describe('showBookDtls', () => {
         // Assert
         expect(res.status).toHaveBeenCalledWith(500);
         expect(res.send).toHaveBeenCalledWith('Error fetching book 12345');
+    });
+
+    it('should return 404 if the book ID is not a string', async () => {
+        const id = 12345 as unknown as string; // Non-string ID
+        await showBookDtls(res as Response, id);
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.send).toHaveBeenCalledWith(`Book ${id} not found`);
+    });
+
+    it('should return 404 if the book does not exist', async () => {
+        const id = 'nonexistentID';
+        Book.findOne = jest.fn().mockReturnValue({
+            populate: jest.fn().mockReturnThis(), // Allows method chaining
+            exec: jest.fn().mockResolvedValue(null) // Resolves to your mock book
+        });
+
+        // Mocking the BookInstance model's find and select methods
+        BookInstance.find = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnThis(), // Select is called here
+            exec: jest.fn().mockResolvedValue(mockCopies)
+        });
+        // Act
+        await showBookDtls(res as Response, id);
+
+        // Assert
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.send).toHaveBeenCalledWith(`Book ${id} not found`);
     });
 });

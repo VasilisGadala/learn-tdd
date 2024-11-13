@@ -7,10 +7,12 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
-    "inlineSourceMap": true
+    "inlineSourceMap": true,
+    "jsx": "react-jsx" // Add this line to support JSX
   },
   "include": [
-    "./**/*.ts"
+    "./**/*.ts",
+    "./**/*.tsx"  // Add this line to include .tsx files
   ],
   "exclude": [
     "node_modules"
